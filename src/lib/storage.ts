@@ -47,7 +47,12 @@ export function logout(): void {
 
 // Members functions
 export function getMembers(): Member[] {
-  return getFromStorage<Member[]>(STORAGE_KEYS.MEMBERS, []);
+  try {
+    return getFromStorage<Member[]>(STORAGE_KEYS.MEMBERS, []);
+  } catch (error) {
+    console.error("Error getting members:", error);
+    return [];
+  }
 }
 
 export function saveMember(member: Member): void {
@@ -70,7 +75,12 @@ export function deleteMember(id: string): void {
 
 // Courses functions
 export function getCourses(): Course[] {
-  return getFromStorage<Course[]>(STORAGE_KEYS.COURSES, []);
+  try {
+    return getFromStorage<Course[]>(STORAGE_KEYS.COURSES, []);
+  } catch (error) {
+    console.error("Error getting courses:", error);
+    return [];
+  }
 }
 
 export function saveCourse(course: Course): void {
@@ -93,7 +103,12 @@ export function deleteCourse(id: string): void {
 
 // Diet Plans functions
 export function getDietPlans(): DietPlan[] {
-  return getFromStorage<DietPlan[]>(STORAGE_KEYS.DIET_PLANS, []);
+  try {
+    return getFromStorage<DietPlan[]>(STORAGE_KEYS.DIET_PLANS, []);
+  } catch (error) {
+    console.error("Error getting diet plans:", error);
+    return [];
+  }
 }
 
 export function saveDietPlan(dietPlan: DietPlan): void {
@@ -116,7 +131,12 @@ export function deleteDietPlan(id: string): void {
 
 // Products functions
 export function getProducts(): Product[] {
-  return getFromStorage<Product[]>(STORAGE_KEYS.PRODUCTS, []);
+  try {
+    return getFromStorage<Product[]>(STORAGE_KEYS.PRODUCTS, []);
+  } catch (error) {
+    console.error("Error getting products:", error);
+    return [];
+  }
 }
 
 export function saveProduct(product: Product): void {
@@ -157,7 +177,12 @@ export function updateProductQuantity(
 
 // Sales functions
 export function getSales(): Sale[] {
-  return getFromStorage<Sale[]>(STORAGE_KEYS.SALES, []);
+  try {
+    return getFromStorage<Sale[]>(STORAGE_KEYS.SALES, []);
+  } catch (error) {
+    console.error("Error getting sales:", error);
+    return [];
+  }
 }
 
 export function saveSale(sale: Sale): void {
