@@ -13,6 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -69,6 +77,13 @@ export default function Inventory() {
     productId: "",
     quantity: "",
   });
+
+  // Sales management states
+  const [salesSearchTerm, setSalesSearchTerm] = useState("");
+  const [editingSale, setEditingSale] = useState<Sale | null>(null);
+  const [editSaleDialogOpen, setEditSaleDialogOpen] = useState(false);
+  const [deleteSaleDialogOpen, setDeleteSaleDialogOpen] = useState(false);
+  const [saleToDelete, setSaleToDelete] = useState<Sale | null>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -304,6 +319,63 @@ export default function Inventory() {
     }
   };
 
+  // Handle edit sale
+  const handleEditSale = (sale: Sale) => {
+    setEditingSale(sale);
+    setEditSaleDialogOpen(true);
+  };
+
+  // Handle delete sale
+  const handleDeleteSale = (sale: Sale) => {
+    setSaleToDelete(sale);
+    setDeleteSaleDialogOpen(true);
+  };
+
+  const confirmDeleteSale = () => {
+    if (saleToDelete) {
+      // Remove sale from storage
+      const updatedSales = sales.filter((s) => s.id !== saleToDelete.id);
+      localStorage.setItem("gym-sales", JSON.stringify(updatedSales));
+
+      // Return product quantity back to inventory
+      const success = updateProductQuantity(
+        saleToDelete.productId,
+        saleToDelete.quantity,
+      );
+      if (success) {
+        loadData();
+        setDeleteSaleDialogOpen(false);
+        setSaleToDelete(null);
+      }
+    }
+  };
+
+  // Update sale information
+  const handleUpdateSale = async (updatedBuyerName: string) => {
+    if (editingSale && updatedBuyerName.trim()) {
+      setIsLoading(true);
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        // Update sale in storage
+        const updatedSales = sales.map((sale) =>
+          sale.id === editingSale.id
+            ? { ...sale, buyerName: updatedBuyerName.trim() }
+            : sale,
+        );
+        localStorage.setItem("gym-sales", JSON.stringify(updatedSales));
+
+        loadData();
+        setEditSaleDialogOpen(false);
+        setEditingSale(null);
+      } catch (error) {
+        console.error("Error updating sale:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const getSelectedProduct = () => {
     return products?.find((p) => p.id === saleForm.productId);
   };
@@ -315,6 +387,19 @@ export default function Inventory() {
   const getLowStockProducts = () => {
     return products.filter((product) => product.quantity <= 5);
   };
+
+  // Filter sales based on search term
+  const filteredSales =
+    sales?.filter(
+      (sale) =>
+        sale?.buyerName
+          ?.toLowerCase()
+          .includes(salesSearchTerm.toLowerCase()) ||
+        sale?.productName
+          ?.toLowerCase()
+          .includes(salesSearchTerm.toLowerCase()) ||
+        sale?.id?.toLowerCase().includes(salesSearchTerm.toLowerCase()),
+    ) || [];
 
   return (
     <div className="space-y-6">
@@ -481,7 +566,7 @@ export default function Inventory() {
                           name: e.target.value,
                         }))
                       }
-                      placeholder="أدخل اس�� المنتج"
+                      placeholder="أدخل اسم المنتج"
                       className={cn(
                         "text-right",
                         errors.productName && "border-red-500",
@@ -847,27 +932,63 @@ export default function Inventory() {
 
             {/* Sales History */}
             <div className="lg:col-span-2 space-y-4">
+              {/* Sales Search */}
+              <Card>
+                <CardContent className="p-4">
+                  <div className="relative">
+                    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="البحث في المبيعات (اسم المشتري، المنتج، رقم الفاتورة...)"
+                      value={salesSearchTerm}
+                      onChange={(e) => setSalesSearchTerm(e.target.value)}
+                      className="pr-10 text-right"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-blue-600" />
-                    سجل المبيعات
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-blue-600" />
+                      سجل المبيعات
+                    </div>
+                    {salesSearchTerm && (
+                      <Badge variant="secondary" className="text-xs">
+                        {filteredSales.length} من {sales.length} عملية
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {sales.length === 0 ? (
+                  {filteredSales.length === 0 ? (
                     <div className="text-center py-8">
-                      <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900">
-                        لا توجد مبيعات حتى الآن
-                      </h3>
-                      <p className="text-gray-600 mt-1">
-                        ستظهر عمليات البيع هنا
-                      </p>
+                      {sales.length === 0 ? (
+                        <>
+                          <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900">
+                            لا توجد مبيعات حتى الآن
+                          </h3>
+                          <p className="text-gray-600 mt-1">
+                            ستظهر عمليات البيع هنا
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                          <h3 className="text-lg font-medium text-gray-900">
+                            لا توجد نتائج للبحث
+                          </h3>
+                          <p className="text-gray-600 mt-1">
+                            جرب تغيير كلمات البحث
+                          </p>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-96 overflow-y-auto">
-                      {sales
+                      {filteredSales
                         .sort(
                           (a, b) =>
                             new Date(b.createdAt).getTime() -
@@ -876,38 +997,77 @@ export default function Inventory() {
                         .map((sale) => (
                           <div
                             key={sale.id}
-                            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200"
                           >
                             <div className="flex-1 text-right">
                               <div className="flex items-center justify-between">
-                                <div>
-                                  <div className="font-medium text-gray-900">
-                                    {sale.buyerName}
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-2">
+                                    <div className="font-medium text-gray-900">
+                                      {sale.buyerName}
+                                    </div>
+                                    <Badge
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      #{sale.id.slice(-6)}
+                                    </Badge>
                                   </div>
-                                  <div className="text-sm text-gray-500">
+                                  <div className="text-sm text-gray-600">
                                     {sale.productName} × {sale.quantity}
-                                  </div>
-                                </div>
-                                <div className="text-left">
-                                  <div className="font-bold text-green-600">
-                                    {sale.totalPrice.toLocaleString()} ريال
                                   </div>
                                   <div className="text-xs text-gray-500">
                                     {new Date(
                                       sale.createdAt,
-                                    ).toLocaleDateString("ar-SA")}
+                                    ).toLocaleDateString("ar-SA")}{" "}
+                                    -{" "}
+                                    {new Date(
+                                      sale.createdAt,
+                                    ).toLocaleTimeString("ar-SA", {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </div>
+                                </div>
+                                <div className="text-left space-y-1">
+                                  <div className="font-bold text-green-600 text-lg">
+                                    {sale.totalPrice.toLocaleString()} ر.س
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {sale.unitPrice} ر.س × {sale.quantity}
                                   </div>
                                 </div>
                               </div>
                             </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePrintInvoice(sale)}
-                              className="mr-3"
-                            >
-                              <Printer className="h-3 w-3" />
-                            </Button>
+                            <div className="flex flex-col gap-2 mr-4">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePrintInvoice(sale)}
+                                className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                              >
+                                <Printer className="h-3 w-3 mr-1" />
+                                طباعة
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditSale(sale)}
+                                className="text-green-600 border-green-200 hover:bg-green-50"
+                              >
+                                <Edit className="h-3 w-3 mr-1" />
+                                تعديل
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDeleteSale(sale)}
+                                className="text-red-600 border-red-200 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                حذف
+                              </Button>
+                            </div>
                           </div>
                         ))}
                     </div>
@@ -919,7 +1079,131 @@ export default function Inventory() {
         </TabsContent>
       </Tabs>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Edit Sale Dialog */}
+      <Dialog open={editSaleDialogOpen} onOpenChange={setEditSaleDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-right">
+              تعديل بيانات المبيعة
+            </DialogTitle>
+            <DialogDescription className="text-right">
+              تعديل اسم المشتري للفاتورة رقم #{editingSale?.id?.slice(-6)}
+            </DialogDescription>
+          </DialogHeader>
+
+          {editingSale && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target as HTMLFormElement);
+                const newBuyerName = formData.get("buyerName") as string;
+                handleUpdateSale(newBuyerName);
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-2">
+                <Label htmlFor="editBuyerName" className="text-right block">
+                  اسم المشتري
+                </Label>
+                <Input
+                  id="editBuyerName"
+                  name="buyerName"
+                  defaultValue={editingSale.buyerName}
+                  placeholder="أدخل اسم المشتري الجديد"
+                  className="text-right"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-right block text-sm text-gray-600">
+                  تفاصيل المبيعة (غير قابلة للتعديل)
+                </Label>
+                <div className="p-3 bg-gray-50 rounded-lg space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">المنتج:</span>
+                    <span className="font-medium">
+                      {editingSale.productName}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">الكمية:</span>
+                    <span className="font-medium">{editingSale.quantity}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">السعر الإجمالي:</span>
+                    <span className="font-medium text-green-600">
+                      {editingSale.totalPrice} ر.س
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <DialogFooter className="gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setEditSaleDialogOpen(false)}
+                >
+                  إلغاء
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      جاري التحديث...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      تحديث
+                    </>
+                  )}
+                </Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Sale Confirmation Dialog */}
+      <AlertDialog
+        open={deleteSaleDialogOpen}
+        onOpenChange={setDeleteSaleDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-right">
+              حذف المبيعة
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-right">
+              هل أنت متأكد من حذف المبيعة للمشتري "{saleToDelete?.buyerName}"؟
+              <br />
+              <span className="text-orange-600 font-medium">
+                ملاحظة: سيتم إرجاع الكمية ({saleToDelete?.quantity}) إلى المخزن
+                تلقائياً.
+              </span>
+              <br />
+              لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteSale}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              حذف المبيعة
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Product Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
