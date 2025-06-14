@@ -198,19 +198,16 @@ export function initializeSampleData(): void {
       {
         id: "1",
         name: "تمارين كمال الأجسام المبتدئين",
-        description: "برنامج تدريبي للمبتدئين في كمال الأجسام",
         createdAt: new Date(),
       },
       {
         id: "2",
         name: "تمارين القوة والتحمل",
-        description: "تمارين لتحسين القوة والتحمل البدني",
         createdAt: new Date(),
       },
       {
         id: "3",
         name: "تمارين اللياقة البدنية",
-        description: "تمارين عامة للحفاظ على اللياقة البدنية",
         createdAt: new Date(),
       },
     ];
@@ -223,19 +220,16 @@ export function initializeSampleData(): void {
       {
         id: "1",
         name: "نظام غذائي لزيادة الكتلة العضلية",
-        description: "نظام غذائي عالي البروتين لبناء العضلات",
         createdAt: new Date(),
       },
       {
         id: "2",
         name: "نظام غذائي لحرق الدهون",
-        description: "نظام غذائي منخفض السعرات الحرارية",
         createdAt: new Date(),
       },
       {
         id: "3",
         name: "نظام غذائي متوازن",
-        description: "نظام غذائي متوازن للحفاظ على الوزن المثالي",
         createdAt: new Date(),
       },
     ];

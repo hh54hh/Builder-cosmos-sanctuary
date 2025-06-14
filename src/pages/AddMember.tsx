@@ -269,7 +269,7 @@ export default function AddMember() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {isEditing ? "تعديل بيانات العضو" : "إضافة مشترك جديد"}
+              {isEditing ? "تعديل بيانات الع��و" : "إضافة مشترك جديد"}
             </h1>
             <p className="text-gray-600">
               {isEditing
@@ -458,11 +458,6 @@ export default function AddMember() {
                               />
                               <div className="flex-1">
                                 <div className="font-medium">{course.name}</div>
-                                {course.description && (
-                                  <div className="text-sm text-gray-500">
-                                    {course.description}
-                                  </div>
-                                )}
                               </div>
                             </div>
                           </CommandItem>
@@ -584,11 +579,6 @@ export default function AddMember() {
                               />
                               <div className="flex-1">
                                 <div className="font-medium">{diet.name}</div>
-                                {diet.description && (
-                                  <div className="text-sm text-gray-500">
-                                    {diet.description}
-                                  </div>
-                                )}
                               </div>
                             </div>
                           </CommandItem>
@@ -652,7 +642,7 @@ export default function AddMember() {
               <Alert>
                 <AlertDescription className="text-right">
                   لا توجد أنظمة غذائية متاحة حالياً. يمكنك إضافة الأنظمة
-                  الغذائية من صفحة إدارة الأنظمة الغذائية.
+                  الغذائية من صفحة إدارة ا��أنظمة الغذائية.
                 </AlertDescription>
               </Alert>
             )}

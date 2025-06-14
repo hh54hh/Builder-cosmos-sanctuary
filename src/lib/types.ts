@@ -13,14 +13,12 @@ export interface Member {
 export interface Course {
   id: string;
   name: string;
-  description?: string;
   createdAt: Date;
 }
 
 export interface DietPlan {
   id: string;
   name: string;
-  description?: string;
   createdAt: Date;
 }
 
