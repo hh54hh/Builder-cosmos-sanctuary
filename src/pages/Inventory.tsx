@@ -81,9 +81,10 @@ export default function Inventory() {
     setSales(getSales());
   };
 
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  );
+  const filteredProducts =
+    products?.filter((product) =>
+      product?.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+    ) || [];
 
   // Product Management
   const validateProductForm = () => {
@@ -169,7 +170,7 @@ export default function Inventory() {
     if (!saleForm.quantity || parseInt(saleForm.quantity) <= 0) {
       newErrors.saleQuantity = "يجب إدخال كمية صحيحة";
     } else {
-      const product = products.find((p) => p.id === saleForm.productId);
+      const product = products?.find((p) => p.id === saleForm.productId);
       if (product && parseInt(saleForm.quantity) > product.quantity) {
         newErrors.saleQuantity = "الكمية المطلوبة أكبر من المتوفرة";
       }
@@ -260,10 +261,10 @@ export default function Inventory() {
       </head>
       <body>
         <div class="header">
-          <div class="logo">صالة حسام لكمال ا��أجسام والرشاقة</div>
+          <div class="logo">صالة حسام لكمال الأجسام والرشاقة</div>
           <div class="subtitle">فاتورة بيع رقم: ${sale.id}</div>
         </div>
-        
+
         <div class="invoice-info">
           <div class="row">
             <span class="label">اسم المشتري:</span>
@@ -286,7 +287,7 @@ export default function Inventory() {
             <span class="value">${sale.totalPrice} ريال</span>
           </div>
         </div>
-        
+
         <div class="footer">
           <div>تاريخ البيع: ${new Date(sale.createdAt).toLocaleDateString("ar-SA")}</div>
           <div>شكراً لتسوقكم معنا</div>
@@ -304,7 +305,7 @@ export default function Inventory() {
   };
 
   const getSelectedProduct = () => {
-    return products.find((p) => p.id === saleForm.productId);
+    return products?.find((p) => p.id === saleForm.productId);
   };
 
   const calculateTotalRevenue = () => {
@@ -480,7 +481,7 @@ export default function Inventory() {
                           name: e.target.value,
                         }))
                       }
-                      placeholder="أدخل اسم المنتج"
+                      placeholder="أدخل اس�� المنتج"
                       className={cn(
                         "text-right",
                         errors.productName && "border-red-500",
@@ -738,8 +739,8 @@ export default function Inventory() {
                         <SelectValue placeholder="اختر المنتج" />
                       </SelectTrigger>
                       <SelectContent>
-                        {products
-                          .filter((product) => product.quantity > 0)
+                        {(products || [])
+                          .filter((product) => product?.quantity > 0)
                           .map((product) => (
                             <SelectItem key={product.id} value={product.id}>
                               <div className="text-right">
@@ -816,7 +817,8 @@ export default function Inventory() {
                     type="submit"
                     disabled={
                       isLoading ||
-                      products.filter((p) => p.quantity > 0).length === 0
+                      (products || []).filter((p) => p?.quantity > 0).length ===
+                        0
                     }
                     className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
                   >
@@ -833,7 +835,8 @@ export default function Inventory() {
                     )}
                   </Button>
 
-                  {products.filter((p) => p.quantity > 0).length === 0 && (
+                  {(products || []).filter((p) => p?.quantity > 0).length ===
+                    0 && (
                     <p className="text-sm text-red-600 text-center">
                       لا توجد منتجات متاحة للبيع
                     </p>
