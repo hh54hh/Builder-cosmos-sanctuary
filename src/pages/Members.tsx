@@ -72,16 +72,16 @@ export default function Members() {
   };
 
   const handlePrintMember = (member: Member) => {
-    const courses = getCourses();
-    const dietPlans = getDietPlans();
+    const courses = getCourses() || [];
+    const dietPlans = getDietPlans() || [];
 
-    const memberCourses = member.courses
+    const memberCourses = (member.courses || [])
       .map(
         (courseId) => courses.find((c) => c.id === courseId)?.name || courseId,
       )
       .join(", ");
 
-    const memberDietPlans = member.dietPlans
+    const memberDietPlans = (member.dietPlans || [])
       .map((dietId) => dietPlans.find((d) => d.id === dietId)?.name || dietId)
       .join(", ");
 
@@ -111,7 +111,7 @@ export default function Members() {
           <div class="logo">صالة حسام لكمال الأجسام والرشاقة</div>
           <div class="subtitle">بيانات المشترك</div>
         </div>
-        
+
         <div class="content">
           <div class="section">
             <div class="section-title">المعلومات الشخصية</div>
@@ -132,14 +132,14 @@ export default function Members() {
               <div class="field-value">${member.weight} كيلو</div>
             </div>
           </div>
-          
+
           <div class="section">
             <div class="section-title">الكورسات المسجل بها</div>
             <div class="field">
               <div class="field-value">${memberCourses || "لم يتم تسجيل أي كورسات"}</div>
             </div>
           </div>
-          
+
           <div class="section">
             <div class="section-title">الأنظمة الغذائية</div>
             <div class="field">
@@ -147,7 +147,7 @@ export default function Members() {
             </div>
           </div>
         </div>
-        
+
         <div class="footer">
           <div>تاريخ الطباعة: ${new Date().toLocaleDateString("ar-SA")}</div>
           <div>صالة حسام - نظام إدارة الأعضاء</div>
@@ -308,8 +308,8 @@ export default function Members() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredMembers.map((member) => {
-            const courses = getCourses();
-            const dietPlans = getDietPlans();
+            const courses = getCourses() || [];
+            const dietPlans = getDietPlans() || [];
 
             return (
               <Card
@@ -371,9 +371,11 @@ export default function Members() {
                       الكورسات:
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {member.courses.length > 0 ? (
+                      {member.courses?.length > 0 ? (
                         member.courses.slice(0, 2).map((courseId) => {
-                          const course = courses.find((c) => c.id === courseId);
+                          const course = courses?.find(
+                            (c) => c.id === courseId,
+                          );
                           return (
                             <Badge
                               key={courseId}
@@ -403,9 +405,9 @@ export default function Members() {
                       الأنظمة الغذائية:
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {member.dietPlans.length > 0 ? (
+                      {member.dietPlans?.length > 0 ? (
                         member.dietPlans.slice(0, 2).map((dietId) => {
-                          const diet = dietPlans.find((d) => d.id === dietId);
+                          const diet = dietPlans?.find((d) => d.id === dietId);
                           return (
                             <Badge
                               key={dietId}
