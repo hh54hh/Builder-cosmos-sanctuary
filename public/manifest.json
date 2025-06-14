@@ -1,0 +1,67 @@
+{
+  "name": "صالة حسام لكمال الأجسام والرشاقة",
+  "short_name": "صالة حسام",
+  "description": "نظام إدارة صالة حسام لكمال الأجسام والرشاقة - إدارة الأعضاء والكورسات والأنظمة الغذائية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["fitness", "sports", "business"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "الأعضاء",
+      "short_name": "الأعضاء",
+      "description": "عرض قائمة الأعضاء",
+      "url": "/dashboard/members",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "إضافة عضو",
+      "short_name": "إضافة عضو",
+      "description": "إضافة عضو جديد",
+      "url": "/dashboard/add-member",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot1.png",
+      "type": "image/png",
+      "sizes": "540x720",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshot2.png",
+      "type": "image/png",
+      "sizes": "720x540",
+      "form_factor": "wide"
+    }
+  ]
+}
