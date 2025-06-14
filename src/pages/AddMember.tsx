@@ -66,6 +66,7 @@ export default function AddMember() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // Search states
   const [courseSearch, setCourseSearch] = useState("");
@@ -78,14 +79,24 @@ export default function AddMember() {
   }, []);
 
   useEffect(() => {
-    if (isEditing && editId) {
+    if (isEditing && editId && dataLoaded) {
       loadMemberForEdit(editId);
     }
-  }, [isEditing, editId]);
+  }, [isEditing, editId, dataLoaded]);
 
   const loadData = () => {
-    setCourses(getCourses());
-    setDietPlans(getDietPlans());
+    try {
+      const coursesData = getCourses() || [];
+      const dietPlansData = getDietPlans() || [];
+      setCourses(coursesData);
+      setDietPlans(dietPlansData);
+      setDataLoaded(true);
+    } catch (error) {
+      console.error("Error loading data:", error);
+      setCourses([]);
+      setDietPlans([]);
+      setDataLoaded(true);
+    }
   };
 
   const loadMemberForEdit = (memberId: string) => {
@@ -212,13 +223,15 @@ export default function AddMember() {
     setSelectedDietPlans((prev) => prev.filter((id) => id !== dietId));
   };
 
-  const filteredCourses = courses.filter((course) =>
-    course.name.toLowerCase().includes(courseSearch.toLowerCase()),
-  );
+  const filteredCourses =
+    courses?.filter((course) =>
+      course?.name?.toLowerCase().includes(courseSearch.toLowerCase()),
+    ) || [];
 
-  const filteredDietPlans = dietPlans.filter((diet) =>
-    diet.name.toLowerCase().includes(dietSearch.toLowerCase()),
-  );
+  const filteredDietPlans =
+    dietPlans?.filter((diet) =>
+      diet?.name?.toLowerCase().includes(dietSearch.toLowerCase()),
+    ) || [];
 
   if (saveSuccess) {
     return (
@@ -318,7 +331,7 @@ export default function AddMember() {
                     type="number"
                     value={formData.age}
                     onChange={(e) => handleInputChange("age", e.target.value)}
-                    placeholder="الع��ر"
+                    placeholder="العمر"
                     min="1"
                     max="100"
                     className={cn(
@@ -407,56 +420,67 @@ export default function AddMember() {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label className="text-right block">اختيار الكورسات</Label>
-              <Popover open={coursesOpen} onOpenChange={setCoursesOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={coursesOpen}
-                    className="w-full justify-between text-right"
-                  >
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    {selectedCourses.length > 0
-                      ? `تم اختيار ${selectedCourses.length} كورس`
-                      : "اختر الكورسات..."}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput
-                      placeholder="البحث في الكورسات..."
-                      value={courseSearch}
-                      onValueChange={setCourseSearch}
-                      className="text-right"
-                    />
-                    <CommandEmpty>لا توجد كورسات مت��ابقة</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
-                      {filteredCourses.map((course) => (
-                        <CommandItem
-                          key={course.id}
-                          onSelect={() => toggleCourse(course.id)}
-                          className="text-right"
-                        >
-                          <div className="flex items-center gap-2 w-full">
-                            <Checkbox
-                              checked={selectedCourses.includes(course.id)}
-                              readOnly
-                            />
-                            <div className="flex-1">
-                              <div className="font-medium">{course.name}</div>
-                              {course.description && (
-                                <div className="text-sm text-gray-500">
-                                  {course.description}
-                                </div>
-                              )}
+              {dataLoaded ? (
+                <Popover open={coursesOpen} onOpenChange={setCoursesOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={coursesOpen}
+                      className="w-full justify-between text-right"
+                    >
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      {selectedCourses.length > 0
+                        ? `تم اختيار ${selectedCourses.length} كورس`
+                        : "اختر الكورسات..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput
+                        placeholder="البحث في الكورسات..."
+                        value={courseSearch}
+                        onValueChange={setCourseSearch}
+                        className="text-right"
+                      />
+                      <CommandEmpty>لا توجد كورسات متطابقة</CommandEmpty>
+                      <CommandGroup className="max-h-64 overflow-auto">
+                        {filteredCourses.map((course) => (
+                          <CommandItem
+                            key={course.id}
+                            onSelect={() => toggleCourse(course.id)}
+                            className="text-right"
+                          >
+                            <div className="flex items-center gap-2 w-full">
+                              <Checkbox
+                                checked={selectedCourses.includes(course.id)}
+                                readOnly
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium">{course.name}</div>
+                                {course.description && (
+                                  <div className="text-sm text-gray-500">
+                                    {course.description}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="w-full justify-between text-right"
+                  disabled
+                >
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  جاري التحميل...
+                </Button>
+              )}
             </div>
 
             {/* Selected Courses */}
@@ -467,14 +491,14 @@ export default function AddMember() {
                 </Label>
                 <div className="flex flex-wrap gap-2">
                   {selectedCourses.map((courseId) => {
-                    const course = courses.find((c) => c.id === courseId);
+                    const course = courses?.find((c) => c.id === courseId);
                     return (
                       <Badge
                         key={courseId}
                         variant="secondary"
                         className="bg-blue-100 text-blue-700 px-3 py-1"
                       >
-                        {course?.name}
+                        {course?.name || courseId}
                         <button
                           type="button"
                           onClick={() => removeCourse(courseId)}
@@ -489,10 +513,19 @@ export default function AddMember() {
               </div>
             )}
 
-            {courses.length === 0 && (
+            {!dataLoaded && (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
+                <p className="text-sm text-gray-500 mt-2">
+                  جاري تحميل البيانات...
+                </p>
+              </div>
+            )}
+
+            {dataLoaded && courses.length === 0 && (
               <Alert>
                 <AlertDescription className="text-right">
-                  لا توجد كو��سات متاحة حالياً. يمكنك إضافة الكورسات من صفحة
+                  لا توجد كورسات متاحة حالياً. يمكنك إضافة الكورسات من صفحة
                   إدارة الكورسات.
                 </AlertDescription>
               </Alert>
@@ -513,56 +546,67 @@ export default function AddMember() {
               <Label className="text-right block">
                 اختيار الأنظمة الغذائية
               </Label>
-              <Popover open={dietPlansOpen} onOpenChange={setDietPlansOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={dietPlansOpen}
-                    className="w-full justify-between text-right"
-                  >
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    {selectedDietPlans.length > 0
-                      ? `تم اختيار ${selectedDietPlans.length} نظام غذائي`
-                      : "اختر الأنظمة الغذائية..."}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0" align="start">
-                  <Command>
-                    <CommandInput
-                      placeholder="البحث في الأنظمة الغذائية..."
-                      value={dietSearch}
-                      onValueChange={setDietSearch}
-                      className="text-right"
-                    />
-                    <CommandEmpty>لا توجد أنظمة غذائية متطابقة</CommandEmpty>
-                    <CommandGroup className="max-h-64 overflow-auto">
-                      {filteredDietPlans.map((diet) => (
-                        <CommandItem
-                          key={diet.id}
-                          onSelect={() => toggleDietPlan(diet.id)}
-                          className="text-right"
-                        >
-                          <div className="flex items-center gap-2 w-full">
-                            <Checkbox
-                              checked={selectedDietPlans.includes(diet.id)}
-                              readOnly
-                            />
-                            <div className="flex-1">
-                              <div className="font-medium">{diet.name}</div>
-                              {diet.description && (
-                                <div className="text-sm text-gray-500">
-                                  {diet.description}
-                                </div>
-                              )}
+              {dataLoaded ? (
+                <Popover open={dietPlansOpen} onOpenChange={setDietPlansOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={dietPlansOpen}
+                      className="w-full justify-between text-right"
+                    >
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      {selectedDietPlans.length > 0
+                        ? `تم اختيار ${selectedDietPlans.length} نظام غذائي`
+                        : "اختر الأنظمة الغذائية..."}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput
+                        placeholder="البحث في الأنظمة الغذائية..."
+                        value={dietSearch}
+                        onValueChange={setDietSearch}
+                        className="text-right"
+                      />
+                      <CommandEmpty>لا توجد أنظمة غذائية متطابقة</CommandEmpty>
+                      <CommandGroup className="max-h-64 overflow-auto">
+                        {filteredDietPlans.map((diet) => (
+                          <CommandItem
+                            key={diet.id}
+                            onSelect={() => toggleDietPlan(diet.id)}
+                            className="text-right"
+                          >
+                            <div className="flex items-center gap-2 w-full">
+                              <Checkbox
+                                checked={selectedDietPlans.includes(diet.id)}
+                                readOnly
+                              />
+                              <div className="flex-1">
+                                <div className="font-medium">{diet.name}</div>
+                                {diet.description && (
+                                  <div className="text-sm text-gray-500">
+                                    {diet.description}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <Button
+                  variant="outline"
+                  className="w-full justify-between text-right"
+                  disabled
+                >
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  جاري التحميل...
+                </Button>
+              )}
             </div>
 
             {/* Selected Diet Plans */}
@@ -573,14 +617,14 @@ export default function AddMember() {
                 </Label>
                 <div className="flex flex-wrap gap-2">
                   {selectedDietPlans.map((dietId) => {
-                    const diet = dietPlans.find((d) => d.id === dietId);
+                    const diet = dietPlans?.find((d) => d.id === dietId);
                     return (
                       <Badge
                         key={dietId}
                         variant="secondary"
                         className="bg-green-100 text-green-700 px-3 py-1"
                       >
-                        {diet?.name}
+                        {diet?.name || dietId}
                         <button
                           type="button"
                           onClick={() => removeDietPlan(dietId)}
@@ -595,7 +639,16 @@ export default function AddMember() {
               </div>
             )}
 
-            {dietPlans.length === 0 && (
+            {!dataLoaded && (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
+                <p className="text-sm text-gray-500 mt-2">
+                  جاري تحميل البيانات...
+                </p>
+              </div>
+            )}
+
+            {dataLoaded && dietPlans.length === 0 && (
               <Alert>
                 <AlertDescription className="text-right">
                   لا توجد أنظمة غذائية متاحة حالياً. يمكنك إضافة الأنظمة
