@@ -150,8 +150,8 @@ export default function DietPlans() {
   };
 
   const getFollowersCount = (dietPlanId: string) => {
-    const members = getMembers();
-    return members.filter((member) => member.dietPlans.includes(dietPlanId))
+    const members = getMembers() || [];
+    return members.filter((member) => member.dietPlans?.includes(dietPlanId))
       .length;
   };
 
@@ -258,7 +258,7 @@ export default function DietPlans() {
                 <Apple className="h-12 w-12 text-gray-400 mx-auto" />
                 <div>
                   <h3 className="text-lg font-medium text-gray-900">
-                    لا توجد أ��ظمة غذائية حتى الآن
+                    لا توجد أنظمة غذائية حتى الآن
                   </h3>
                   <p className="text-gray-600 mt-1">
                     ابدأ بإضافة أول نظام غذائي

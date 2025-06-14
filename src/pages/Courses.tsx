@@ -148,8 +148,9 @@ export default function Courses() {
   };
 
   const getEnrolledMembersCount = (courseId: string) => {
-    const members = getMembers();
-    return members.filter((member) => member.courses.includes(courseId)).length;
+    const members = getMembers() || [];
+    return members.filter((member) => member.courses?.includes(courseId))
+      .length;
   };
 
   return (
@@ -450,7 +451,7 @@ export default function Courses() {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-right">
               هل أنت متأكد من حذف الكورس "{courseToDelete?.name}"؟ لا يمكن
-              التراجع عن هذا الإجراء.
+              التراجع عن هذا ا��إجراء.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">
